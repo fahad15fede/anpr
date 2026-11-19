@@ -1,0 +1,5 @@
+ultralytics>=8.3
+easyocr
+streamlit>=1.40
+opencv-python-headless
+pandas

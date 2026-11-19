@@ -1,0 +1,6 @@
+path: C:/Users/Fahad/Desktop/anpr-demo/data
+train: train/images
+val: [test/images, valid/images]
+names:
+  0: plate
+  1: vehicle

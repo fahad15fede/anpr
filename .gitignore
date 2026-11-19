@@ -1,0 +1,17 @@
+.venv/
+__pycache__/
+runs/
+.claude/
+
+# generated output and large media
+data/out/
+data/frames_to_label/
+data/images/
+data/labels/
+data/videos/
+*.zip
+*.cache
+
+# model weights: keep only the trained plate detector
+*.pt
+!models/plate.pt

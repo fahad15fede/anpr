@@ -1,0 +1,13 @@
+train: ../train/images
+val: ../valid/images
+test: ../test/images
+
+nc: 2
+names: ['License Plate', 'Vehicle']
+
+roboflow:
+  workspace: fahad-pervez-s-workspace
+  project: plate-detection2-4dl38
+  version: 1
+  license: Private
+  url: https://app.roboflow.com/fahad-pervez-s-workspace/plate-detection2-4dl38/1
