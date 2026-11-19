@@ -44,7 +44,7 @@ ALLOW = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-"
 MERGE_GAP_S = 2.0       # tracks this close in time with similar text = same car
 MERGE_SIMILARITY = 0.7  # 0..1 text similarity needed to merge two tracks
 
-# "IN" = Indian plates, "UK" = UK plates, "auto" = whichever fits best, None = no correction
+# "IN" / "UK" / "PK" = Indian / UK / Pakistani plates, "auto" = whichever fits best, None = no correction
 PLATE_REGION = "auto"
 PLATE_PATTERN = None  # optional extra regex filter, e.g. r"^[A-Z]{2}\d{2}[A-Z]{3}$"
 
@@ -54,6 +54,9 @@ FORMATS = {
     "IN": ["AA" + "9" * d + "A" * k + "9999" for d in (2, 1) for k in range(4) if 2 + d + k >= 4],
     # UK current style: AA99 AAA, e.g. GX15OGJ
     "UK": ["AA99AAA"],
+    # Pakistan: AA(A) 999(9), e.g. LEA1234, KAD404, ICT123; older Punjab adds a
+    # 2-digit year: LEB 07 1234
+    "PK": [l + d for l in ("AA", "AAA") for d in ("999", "9999")] + ["AAA99999", "AAA999999"],
 }
 
 
@@ -107,8 +110,8 @@ def _fit(text: str, region):
             else:
                 if subs > MAX_FIXES:
                     continue
-                # fewest changes (substitutions + dropped junk), then keep the start
-                cand = (subs + dropped, s, subs, "".join(out))
+                # fewest changes (substitutions + dropped junk), then fewest swaps, then earliest start
+                cand = (subs + dropped, subs, s, "".join(out))
                 best = min(best, cand) if best else cand
     return (best[0], best[3]) if best else None
 

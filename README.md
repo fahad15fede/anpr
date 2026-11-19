@@ -37,7 +37,7 @@ flowchart LR
     C --> D[ByteTrack<br/>one ID per plate across frames]
     D --> E[Quality filters<br/>size, sharpness, frame edge]
     E --> F[EasyOCR<br/>every 3rd sighting, max 15 reads]
-    F --> G[Auto-pick plate format<br/>India or UK, once per video]
+    F --> G[Auto-pick plate format<br/>India, UK or Pakistan, once per video]
     G --> H[Format correction<br/>fix O/0, I/1, Z/2 ... by position]
     H --> I[Confidence-weighted vote<br/>+ merge broken tracks]
     I --> J[(SQLite<br/>sightings.db)]
@@ -53,7 +53,7 @@ flowchart LR
 3. **Tracking.** ByteTrack gives each plate a stable ID across frames, so one car = one track, not hundreds of separate detections.
 4. **Quality filters.** A crop is skipped if it is narrower than 40px, blurry (Laplacian variance < 40), or touching the frame edge (half-visible plates give misleading reads).
 5. **OCR.** EasyOCR reads every 3rd usable sighting of a track, up to 15 reads per track (OCR is the slowest step on CPU). Small crops are enlarged 2–3× in greyscale first. Text pieces are joined left to right, so two-part plates are read as one.
-6. **Plate format detection.** All raw reads from the video are tested against the India and UK layouts. The layout that most reads fit cleanly is chosen *once for the whole video*. Choosing per read let UK patterns wrongly win on Indian plates.
+6. **Plate format detection.** All raw reads from the video are tested against the India, UK and Pakistan layouts. The layout that most reads fit cleanly is chosen *once for the whole video*. Choosing per read let UK patterns wrongly win on Indian plates.
 7. **Format correction.** Each read is snapped onto the chosen layout. Letter/digit look-alikes are fixed by position (`O↔0`, `I↔1`, `Z↔2`, `S↔5`, `B↔8`, `G↔6`…), and junk such as the `IND`/`GB` strip is dropped. Reads needing more than 3 fixes are rejected, which removes most non-plate text.
 8. **Voting.** Each track's reads are combined by a confidence-weighted vote. The winning text becomes the plate, and its share of the vote becomes the confidence.
 9. **Track merging.** If the tracker loses a plate and gives it a new ID, two tracks less than 2 s apart with ≥ 70% similar text are merged back into one vehicle.
@@ -65,6 +65,7 @@ flowchart LR
 |---|---|---|
 | India `IN` | `AA 9(9) A(AA) 9999` | `DL7CD5017`, `HR26CO6869` |
 | UK `UK` | `AA99 AAA` (current style) | `GX15OGJ` |
+| Pakistan `PK` | `AA(A) 999(9)`, older Punjab `AAA 99 9999` | `LEA1234`, `KAD404`, `LEB071234` |
 | Off | no correction, raw OCR text | |
 
 To add another country, add its layouts to the `FORMATS` dict in `process.py`.
@@ -232,7 +233,7 @@ anpr-demo/
 
 - **Small training set.** The detector has seen 22 frames from one Indian video. Labelling frames from the UK video (already extracted in `data/frames_to_label/`) and retraining should cut misreads and false hits like the van sign.
 - **OCR on small plates.** EasyOCR struggles with plates under ~60px wide. Options: a plate-specific OCR model (e.g. fast-plate-ocr or PaddleOCR), or super-resolution on crops.
-- **Formats.** Only current Indian and UK layouts are supported; older UK styles and other countries need entries in `FORMATS`.
+- **Formats.** Indian, UK and Pakistani layouts are supported; older UK styles and other countries need entries in `FORMATS`.
 - **Speed.** It is CPU only. A GPU, or `--stride 2`, makes processing much faster.
 - **Playback.** Only H.264 `.mp4` plays in the browser; other formats are still processed and searchable.
 - **No real-time mode.** Videos are processed after upload; there is no live camera stream yet.
