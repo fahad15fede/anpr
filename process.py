@@ -44,7 +44,7 @@ ALLOW = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-"
 MERGE_GAP_S = 2.0       # tracks this close in time with similar text = same car
 MERGE_SIMILARITY = 0.7  # 0..1 text similarity needed to merge two tracks
 
-# "IN" / "UK" / "CN" = Indian / UK / Chinese plates, "auto" = whichever fits best, None = no correction
+# "IN" = Indian plates, "UK" = UK plates, "auto" = whichever fits best, None = no correction
 PLATE_REGION = "auto"
 PLATE_PATTERN = None  # optional extra regex filter, e.g. r"^[A-Z]{2}\d{2}[A-Z]{3}$"
 
@@ -54,10 +54,6 @@ FORMATS = {
     "IN": ["AA" + "9" * d + "A" * k + "9999" for d in (2, 1) for k in range(4) if 2 + d + k >= 4],
     # UK current style: AA99 AAA, e.g. GX15OGJ
     "UK": ["AA99AAA"],
-    # China: [province char] A·XXXXX(X), e.g. 粤B·06817. The Chinese province character
-    # can't be read by the English OCR, so it is dropped and B06817 is stored.
-    # L = letter except I/O, X = letter or digit except I/O (Chinese plates skip I and O).
-    "CN": ["LXXXXX"],
 }
 
 
@@ -100,11 +96,7 @@ def _fit(text: str, region):
             rest, dropped = text[s:s + n], len(text) - n
             out, subs = [], 0
             for ch, kind in zip(rest, kinds):
-                if kind in "LX" and ch in "IO":  # Chinese plates never use I or O
-                    if kind == "L":
-                        break
-                    ch, subs = {"I": "1", "O": "0"}[ch], subs + 0.5
-                ok = kind == "X" or (ch.isdigit() if kind in "9" else ch.isalpha())
+                ok = ch.isdigit() if kind == "9" else ch.isalpha()
                 if not ok:
                     new = (TO_DIGIT if kind == "9" else TO_LETTER).get(ch)
                     if new is None:

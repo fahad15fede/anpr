@@ -158,7 +158,7 @@ with tab_upload:
                           label_visibility="collapsed")
     with st.expander("Settings"):
         s1, s2, s3 = st.columns(3)
-        region = s1.selectbox("Plate format", ["Auto", "India", "UK", "China", "Any (no correction)"],
+        region = s1.selectbox("Plate format", ["Auto", "India", "UK", "Any (no correction)"],
                               help="Auto looks at all reads in the video and picks the best-fitting format.")
         imgsz = s2.selectbox("Plate sizes", ["All sizes", "Auto (faster)", 640, 1280],
                              help="All sizes: runs the detector at 640 (big close-up plates) AND 1280 "
@@ -186,7 +186,7 @@ with tab_upload:
             try:
                 n, used_region, used_sz = process.process_video(
                     dest, reader, model_path=model_path,
-                    region={"Auto": "auto", "India": "IN", "UK": "UK", "China": "CN"}.get(region),
+                    region={"Auto": "auto", "India": "IN", "UK": "UK"}.get(region),
                     imgsz={"All sizes": "all", "Auto (faster)": "auto"}.get(imgsz, imgsz),
                     stride=stride,
                     progress=lambda f, msg: bar.progress(f, text=msg))
